@@ -10,15 +10,17 @@ class PersistedDict(dict):
     __keys = set()
     __log = None
 
-    def __init__(self, storage_dir: str, **kwargs):
+    def __init__(self, storage_dir: str, storage_files_mask='storage', debug=False, **kwargs):
         super().__init__(**kwargs)
         self.__storage_dir = storage_dir
+        self.__storage_files_mask = storage_files_mask
+        self.__debug = debug
 
         if not os.path.isdir(self.__storage_dir):
             os.mkdir(self.__storage_dir)
 
-        self.__storage = os.path.join(self.__storage_dir, 'storage')
-        self.__log = get_module_logger('persisted_dict')
+        self.__storage = os.path.join(self.__storage_dir, self.__storage_files_mask)
+        self.__log = get_module_logger('persisted_dict', self.__debug)
 
     def __getitem__(self, key):
         prepared_key = self.__to_shelved_key(key)
