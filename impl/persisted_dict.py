@@ -5,13 +5,35 @@ import shutil
 from impl import get_module_logger
 
 
+class PersistentDictContainer:
+
+    def __init__(self, storage_dir, storage_files_mask, debug):
+        self.storage_dir = storage_dir
+        self.storage_files_mask = storage_files_mask
+        self.debug = debug
+
+    @staticmethod
+    def to_dictionary(dict_obj):
+        if not isinstance(dict_obj, PersistentDictContainer):
+            raise ValueError
+        return PersistedDict(dict_obj.storage_dir, dict_obj.storage_files_mask, dict_obj.debug)
+
+
+class SelfMarker:
+    """
+    Dummy marker
+    Used when an instance is added to itself.
+    """
+    pass
+
+
 class PersistedDict(dict):
     __storage_dir = None
     __keys = set()
     __log = None
 
-    def __init__(self, storage_dir: str, storage_files_mask='storage', debug=False, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, storage_dir: str, storage_files_mask='storage', debug=False):
+        super().__init__()
         self.__storage_dir = storage_dir
         self.__storage_files_mask = storage_files_mask
         self.__debug = debug
@@ -31,6 +53,8 @@ class PersistedDict(dict):
             unpickled_value = storage.get(prepared_key)
             if type(unpickled_value) is SelfMarker:
                 return self
+            elif type(unpickled_value) is PersistentDictContainer:
+                return unpickled_value.to_dictionary(unpickled_value)
             else:
                 return unpickled_value
 
@@ -38,8 +62,8 @@ class PersistedDict(dict):
         self.__validate_key(key)
         prepared_key = self.__to_shelved_key(key)
 
-        if value == self:
-            value = SelfMarker()
+        if isinstance(value, PersistedDict):
+            value = SelfMarker() if value == self else self.to_container(value)
 
         with shelve.open(self.__storage) as storage:
             storage[prepared_key] = value
@@ -90,6 +114,13 @@ class PersistedDict(dict):
     def storage_dir(self):
         return self.__storage_dir
 
+    @property
+    def storage_files_mask(self):
+        return self.__storage_files_mask
+
+    def get_debug(self):
+        return self.__debug
+
     def __validate_key(self, key):
         if not isinstance(key, (int, float, str)) or isinstance(key, (bool)):
             raise KeyError("Key must be string or number.")
@@ -97,10 +128,7 @@ class PersistedDict(dict):
             if len(key.strip()) is 0:
                 raise KeyError("String key must be not empty")
 
-
-class SelfMarker:
-    """
-    Dummy marker
-    Used when an instance is added to itself.
-    """
-    pass
+    def to_container(self, object_dict) -> PersistentDictContainer:
+        if not isinstance(object_dict, PersistedDict):
+            raise ValueError
+        return PersistentDictContainer(object_dict.storage_dir, object_dict.storage_files_mask, object_dict.get_debug())

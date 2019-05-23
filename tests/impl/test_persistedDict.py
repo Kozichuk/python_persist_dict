@@ -189,6 +189,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
     """
     specific cases
     1. adding instance of PersistentDict to itself
+    2. adding another instances of PersistentDict to current dict
     """
 
     def test_add_self_instance_to_dictionary_as_value(self):
@@ -214,6 +215,32 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         self.assertIn(key_2, unpickled_dict.keys())
         # and
         self.assertIn(key_3, unpickled_dict.keys())
+        self.assertIn(key_3, self.test_dict.keys())
+
+    def test_add_persistent_dictionary_to_dictionary_as_value_with_another_persist_dir(self):
+        # given
+        dict_2_key = "dict_2_key"
+        dict_2_persist_dir = "persist_2"
+        dict_2_persist_storages_file_mask = "storage_2"
+        # and
+        key_1_in_dict_2 = "key_1"
+        key_2_in_dict_2 = "key_2"
+
+        value_1_in_dict_2 = "value_1"
+        value_2_in_dict_2 = "value_2"
+        # and
+        dict_2 = PersistedDict(dict_2_persist_dir)
+        dict_2[key_1_in_dict_2] = value_1_in_dict_2
+        dict_2[key_2_in_dict_2] = value_2_in_dict_2
+        # when
+        self.test_dict[dict_2_key] = dict_2
+        unpickled_dict = self.test_dict[dict_2_key]
+        # then
+        self.assertIn(key_1_in_dict_2, unpickled_dict.keys())
+        self.assertIn(key_2_in_dict_2, unpickled_dict.keys())
+        # teardown
+        unpickled_dict.clear()
+
 
     def tearDown(self):
         self.test_dict.clear()
