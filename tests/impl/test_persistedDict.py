@@ -19,6 +19,7 @@ class TestPersistedDictInitDict(unittest.TestCase):
         # then
         self.assertTrue(os.path.isdir(self.test_dict.storage_dir))
         # tearDown
+        self.test_dict.clear()
 
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     def test_init_storage_from_non_accessible_folder_raised_exception(self):
