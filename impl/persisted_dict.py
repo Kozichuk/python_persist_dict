@@ -50,6 +50,11 @@ class PersistedDict(dict):
             storage.pop(key)
         self.__keys.remove(key)
 
+    def __eq__(self, other):
+        if not isinstance(other, PersistedDict):
+            return False
+        return self.storage_dir == other.storage_dir and self.keys() == other.keys()
+
     def keys(self):
         with shelve.open(self.__storage) as storage:
             tmp = [self.__from_shelve_key(k) for k in list(storage.keys())]
