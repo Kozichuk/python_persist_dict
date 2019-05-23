@@ -1,74 +1,77 @@
 import os
-import pickle
+import shelve
 import shutil
 
 from impl import get_module_logger
 
 
 class PersistedDict(dict):
-    __persist_dir = None
+    __storage_dir = None
     __keys = set()
     __log = None
 
-    def __init__(self, persist_dir: str, **kwargs):
+    def __init__(self, storage_dir: str, **kwargs):
         super().__init__(**kwargs)
-        self.__persist_dir = persist_dir
+        self.__storage_dir = storage_dir
 
+        if not os.path.isdir(self.__storage_dir):
+            os.mkdir(self.__storage_dir)
+
+        self.__storage = os.path.join(self.__storage_dir, 'storage')
         self.__log = get_module_logger('persisted_dict')
-        # create dir
-        if not os.path.exists(persist_dir):
-            os.makedirs(persist_dir)
-            self.__log.debug("Directory {} created".format(self.__persist_dir))
-        else:
-            self.__log.warn("Directory {} already exists".format(self.__persist_dir))
 
     def __getitem__(self, key):
-        if key not in self.__keys and not self.__persisted_object_exists(key):
-            raise KeyError(key)
-        return self.__read(self.__to_path(key))
+        prepared_key = self.__to_shelved_key(key)
+        with shelve.open(self.__storage) as storage:
+            if prepared_key not in storage.keys():
+                raise KeyError()
+            return storage.get(prepared_key)
 
     def __setitem__(self, key, value):
         self.__validate_key(key)
-        if key in self.__keys and self.__persisted_object_exists(key):
-            self.__log.warn("Key {} already exists. Rewriting.".format(key))
-        self.__keys.add(key)
-        self.__write(self.__to_path(key), value)
+        prepared_key = self.__to_shelved_key(key)
+
+        with shelve.open(self.__storage) as storage:
+            storage[prepared_key] = value
 
     def __delitem__(self, key):
-        if key in self.__keys and self.__persisted_object_exists(key):
-            self.__log.debug("Deleting key {}.".format(key))
-            self.__keys.remove(key)
-            self.__log.debug("Value for key {} successfully deleted.".format(key))
-            try:
-                os.remove(self.__to_path(key))
-            except FileNotFoundError:
-                self.__log.error("Element with key {} didn't exist in storage".format(key))
-        else:
-            self.__log.error("Key {} not exists".format(key))
-            raise KeyError("Key {} not exists".format(key))
+        with shelve.open(self.__storage) as storage:
+            if key not in storage.keys():
+                raise KeyError()
+            storage.pop(key)
 
     def keys(self):
-        return self.__keys
+        with shelve.open(self.__storage) as storage:
+            tmp = [self.__from_shelve_key(k) for k in list(storage.keys())]
+            return tmp
 
     def clear(self):
-        self.__keys.clear()
-        shutil.rmtree(self.__persist_dir)
+        with shelve.open(self.__storage) as storage:
+            storage.clear()
+        shutil.rmtree(self.__storage_dir)
 
-    def __persisted_object_exists(self, key):
-        return True if os.path.isfile(self.__to_path(str(key))) else False
-
+    # обходим ограничение shelve - можно использовать только строки в качестве ключей
     @staticmethod
-    def __write(key, value):
-        with open(key, 'wb') as target:
-            pickle.dump(value, target)
+    def __to_shelved_key(key):
+        if type(key) is int:
+            return "int_{}".format(key)
+        elif type(key) is float:
+            return "float_{}".format(key)
+        else:
+            return key
 
-    @staticmethod
-    def __read(key):
-        with open(key, 'rb') as saved_data:
-            return pickle.load(saved_data)
+    def __from_shelve_key(self, shelved_key: str):
+        self.__log.debug('Shelving key {}'.format(shelved_key))
+        if shelved_key.startswith('int_'):
+            return int(shelved_key[4:])
+        elif shelved_key.startswith('float_'):
+            return float(shelved_key[6:])
+        else:
+            return shelved_key
 
-    def __to_path(self, key):
-        return os.path.join(self.__persist_dir, str(key))
+    @property
+    def storage_dir(self):
+        return self.__storage_dir
 
     def __validate_key(self, key):
         if not isinstance(key, (int, float, str)) or isinstance(key, (bool)):
