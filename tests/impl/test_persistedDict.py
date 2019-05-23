@@ -171,5 +171,34 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         self.assertIn(key_1, self.test_dict.keys())
         self.assertIn(key_2, self.test_dict.keys())
 
+    """
+    specific cases
+    1. adding instance of PersistentDict to itself
+    """
+
+    def test_add_self_instance_to_dictionary_as_value(self):
+        # given
+        self_key = 'instance_of_self'
+        key_1 = 'key_1'
+        key_2 = 'key_2'
+        key_3 = 'new_key'
+
+        value_1 = 'value_1'
+        value_2 = 'value_2'
+        value_3 = 'value_3'
+
+        self.test_dict[key_1] = value_1
+        self.test_dict[key_2] = value_2
+        # when
+        self.test_dict[self_key] = self.test_dict
+        # then
+        unpickled_dict: PersistedDict = self.test_dict[self_key]
+        self.test_dict[key_3] = value_3
+        # and
+        self.assertIn(key_1, unpickled_dict.keys())
+        self.assertIn(key_2, unpickled_dict.keys())
+        # and
+        self.assertIn(key_3, unpickled_dict.keys())
+
     def tearDown(self):
         self.test_dict.clear()
