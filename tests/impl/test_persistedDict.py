@@ -21,6 +21,20 @@ class TestPersistedDictInitDict(unittest.TestCase):
         # tearDown
         self.test_dict.clear()
 
+    def test_recover_from_existing_storage(self):
+        # given
+        key_1 = 'key_1'
+        value_1 = 'value_1'
+        # and
+        test_path = 'test_persist'
+        self.test_dict = PersistedDict(test_path)
+        # and
+        self.test_dict[key_1] = value_1
+        # when
+        self.test_dict = PersistedDict(test_path)
+        # then
+        self.assertIn(key_1, self.test_dict.keys())
+
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     def test_init_storage_from_non_accessible_folder_raised_exception(self):
         # only on windows
@@ -50,7 +64,7 @@ class DummyObject(object):
 class TestPersistedDictBasicOperations(unittest.TestCase):
 
     def setUp(self):
-        self.persist_dir = 'persist'
+        self.persist_dir = 'test_persist'
         self.test_dict = PersistedDict(self.persist_dir)
 
     """
