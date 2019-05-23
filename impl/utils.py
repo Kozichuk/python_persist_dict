@@ -5,8 +5,11 @@ sh = logging.StreamHandler()
 sh.setFormatter(formatter)
 
 
-def get_module_logger(resource_name):
+def get_module_logger(resource_name, debug: bool):
     module_logging = logging.getLogger(resource_name)
-    module_logging.setLevel(logging.INFO)
+    if debug:
+        module_logging.setLevel(logging.DEBUG)
+    else:
+        module_logging.setLevel(logging.INFO)
     module_logging.addHandler(sh)
     return logging.getLogger(resource_name)
