@@ -9,15 +9,15 @@ from impl.persisted_dict import PersistedDict
 
 class TestPersistedDictInitDict(unittest.TestCase):
     def setUp(self):
-        self.myDict = None
+        self.test_dict = None
 
     def test_init_storage_from_accessible_folder_success(self):
         # given
         test_path = 'test_persist'
         # when
-        self.myDict = PersistedDict(test_path)
+        self.test_dict = PersistedDict(test_path)
         # then
-        self.assertTrue(os.path.isdir(self.myDict.storage_dir))
+        self.assertTrue(os.path.isdir(self.test_dict.storage_dir))
         # tearDown
 
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
@@ -27,13 +27,13 @@ class TestPersistedDictInitDict(unittest.TestCase):
         non_accessible_path = 'C:/Windows/tmp'
         # when
         with self.assertRaises(PermissionError):
-            self.myDict = PersistedDict(non_accessible_path)
+            self.test_dict = PersistedDict(non_accessible_path)
         # then
         # catch exception
 
     def tearDown(self):
         pass
-        # self.myDict.clear()
+        # self.test_dict.clear()
 
 
 class DummyObject(object):
@@ -50,7 +50,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
 
     def setUp(self):
         self.persist_dir = 'persist'
-        self.myDict = PersistedDict(self.persist_dir)
+        self.test_dict = PersistedDict(self.persist_dir)
 
     """
     __setitem__
@@ -66,8 +66,8 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         [-1]
     ])
     def test_add_new_pair_with_valid_key_success(self, key):
-        self.myDict[key] = 123
-        self.assertTrue(key in self.myDict.keys())
+        self.test_dict[key] = 123
+        self.assertTrue(key in self.test_dict.keys())
 
     @parameterized.expand([
         [""],
@@ -82,7 +82,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
     ])
     def test_add_new_key_raises_exception_on_invalid_key(self, key):
         with self.assertRaises(KeyError):
-            self.myDict[key] = 123
+            self.test_dict[key] = 123
 
     @parameterized.expand([
         [1],
@@ -103,9 +103,9 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # given
         key = "test_key"
         # when
-        self.myDict[key] = value
+        self.test_dict[key] = value
         # then
-        self.assertEqual(self.myDict[key], value)
+        self.assertEqual(self.test_dict[key], value)
         # assert equals for pickled file and value
 
     def test_add_new_pair_with_custom_class_as_value_success(self):
@@ -113,9 +113,9 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         dummy_object = DummyObject()
         key = 'test_key'
         # when
-        self.myDict[key] = dummy_object
+        self.test_dict[key] = dummy_object
         # then
-        self.assertEqual(self.myDict[key], dummy_object)
+        self.assertEqual(self.test_dict[key], dummy_object)
 
     def test_add_new_pair_with_invalid_value_raises_exception(self):
         # Можем положить любой объект, как будто ограничений нет
@@ -130,9 +130,9 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         key = 'test_key'
         value = 'test_value'
         # when
-        self.myDict[key] = value
+        self.test_dict[key] = value
         # then
-        self.assertEqual(self.myDict[key], value)
+        self.assertEqual(self.test_dict[key], value)
 
     """
     __delitem__
@@ -142,9 +142,9 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # given
         key = 'test_key'
         value = 'test_value'
-        self.myDict[key] = value
+        self.test_dict[key] = value
         # when
-        del self.myDict[key]
+        del self.test_dict[key]
         # then
         self.assertFalse(os.path.isfile(os.path.join(self.persist_dir, key)))
 
@@ -153,7 +153,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         non_exist_key = 'non_exist_key'
         # then
         with self.assertRaises(KeyError):
-            del self.myDict[non_exist_key]
+            del self.test_dict[non_exist_key]
 
     """
     keys()
@@ -165,11 +165,11 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         key_2 = 'test_key_2'
         value = 'test_value'
         # when
-        self.myDict[key_1] = value
-        self.myDict[key_2] = value
+        self.test_dict[key_1] = value
+        self.test_dict[key_2] = value
         # then
-        self.assertIn(key_1, self.myDict.keys())
-        self.assertIn(key_2, self.myDict.keys())
+        self.assertIn(key_1, self.test_dict.keys())
+        self.assertIn(key_2, self.test_dict.keys())
 
     def tearDown(self):
-        self.myDict.clear()
+        self.test_dict.clear()
