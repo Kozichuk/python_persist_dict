@@ -22,23 +22,33 @@ class PersistedDict(dict):
 
     def __getitem__(self, key):
         prepared_key = self.__to_shelved_key(key)
+
         with shelve.open(self.__storage) as storage:
             if prepared_key not in storage.keys():
                 raise KeyError()
-            return storage.get(prepared_key)
+            unpickled_value = storage.get(prepared_key)
+            if type(unpickled_value) is SelfMarker:
+                return self
+            else:
+                return unpickled_value
 
     def __setitem__(self, key, value):
         self.__validate_key(key)
         prepared_key = self.__to_shelved_key(key)
 
+        if value == self:
+            value = SelfMarker()
+
         with shelve.open(self.__storage) as storage:
             storage[prepared_key] = value
+        self.__keys.add(key)
 
     def __delitem__(self, key):
         with shelve.open(self.__storage) as storage:
             if key not in storage.keys():
                 raise KeyError()
             storage.pop(key)
+        self.__keys.remove(key)
 
     def keys(self):
         with shelve.open(self.__storage) as storage:
@@ -51,8 +61,8 @@ class PersistedDict(dict):
         shutil.rmtree(self.__storage_dir)
 
     # обходим ограничение shelve - можно использовать только строки в качестве ключей
-    @staticmethod
-    def __to_shelved_key(key):
+    def __to_shelved_key(self, key):
+        self.__log.debug('Origin key {}'.format(key))
         if type(key) is int:
             return "int_{}".format(key)
         elif type(key) is float:
@@ -79,3 +89,11 @@ class PersistedDict(dict):
         if type(key) is str:
             if len(key.strip()) is 0:
                 raise KeyError("String key must be not empty")
+
+
+class SelfMarker:
+    """
+    Dummy marker
+    Used when an instance is added to itself.
+    """
+    pass
