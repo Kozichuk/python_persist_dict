@@ -1,5 +1,6 @@
 import os
 import pickle
+import shutil
 
 from impl import get_module_logger
 
@@ -50,13 +51,8 @@ class PersistedDict(dict):
         return self.__keys
 
     def clear(self):
-        for key in self.keys():
-            try:
-                os.remove(self.__to_path(key))
-            except FileNotFoundError:
-                self.__log.error("Element with key {} didn't exist in storage".format(key))
         self.__keys.clear()
-        # По идее нужно грохать папку если она не пуста
+        shutil.rmtree(self.__persist_dir)
 
     def __persisted_object_exists(self, key):
         return True if os.path.isfile(self.__to_path(str(key))) else False
@@ -75,7 +71,7 @@ class PersistedDict(dict):
         return os.path.join(self.__persist_dir, str(key))
 
     def __validate_key(self, key):
-        if not isinstance(key, (int, float, str)):
+        if not isinstance(key, (int, float, str)) or isinstance(key, (bool)):
             raise KeyError("Key must be string or number.")
         if type(key) is str:
             if len(key.strip()) is 0:

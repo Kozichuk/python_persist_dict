@@ -29,9 +29,6 @@ class TestPersistedDictInitDict(unittest.TestCase):
         # then
         # catch exception
 
-    def test_init_storage_from_existed_storage_success(self):
-        pass
-
     def tearDown(self):
         pass
         # self.myDict.clear()
@@ -61,6 +58,8 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         ["a"],
         ["aasvasdasd"],
         [1],
+        [1.0],
+        [.1],
         [99999],
         [-1]
     ])
@@ -75,8 +74,8 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         [set()],
         [{}],
         [[]],
-        # [True],
-        # [False],
+        [True],
+        [False],
         [DummyObject()],
     ])
     def test_add_new_key_raises_exception_on_invalid_key(self, key):
@@ -91,6 +90,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         [0.1],
         [None],
         [True],
+        [False],
         [set()],
         [{1, 2, 3}],
         [{}],
