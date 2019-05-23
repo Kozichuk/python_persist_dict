@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 
 from parameterized import parameterized
@@ -16,9 +17,10 @@ class TestPersistedDictInitDict(unittest.TestCase):
         # when
         self.myDict = PersistedDict(test_path)
         # then
-        self.assertTrue(os.path.isdir(test_path))
+        self.assertTrue(os.path.isdir(self.myDict.storage_dir))
         # tearDown
 
+    @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     def test_init_storage_from_non_accessible_folder_raised_exception(self):
         # only on windows
         # given
@@ -99,12 +101,11 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
     ])
     def test_add_new_pair_with_valid_value_success(self, value):
         # given
-        key = 'test_key'
+        key = "test_key"
         # when
         self.myDict[key] = value
         # then
         self.assertEqual(self.myDict[key], value)
-        self.assertTrue(os.path.isfile(os.path.join(self.persist_dir, key)))
         # assert equals for pickled file and value
 
     def test_add_new_pair_with_custom_class_as_value_success(self):
@@ -115,8 +116,6 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         self.myDict[key] = dummy_object
         # then
         self.assertEqual(self.myDict[key], dummy_object)
-        self.assertTrue(os.path.isfile(os.path.join(self.persist_dir, key)))
-        # assert equals for pickled file and value
 
     def test_add_new_pair_with_invalid_value_raises_exception(self):
         # Можем положить любой объект, как будто ограничений нет
@@ -133,30 +132,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # when
         self.myDict[key] = value
         # then
-        # no exception
-
-    def test_get_value_from_dictionary_if_key_non_exists_raises_exception(self):
-        # given
-        key = 'test_key'
-        value = 'test_value'
-        another_key = 'another_key'
-        # when
-        self.myDict[key] = value
-        # then
-        with self.assertRaises(KeyError):
-            _ = self.myDict[another_key]
-
-    def test_get_value_from_dictionary_if_key_exists_and_value_nonexist(self):
-        # given
-        key = 'test_key'
-        value = 'test_value'
-        # when
-        self.myDict[key] = value
-        # some disaster
-        os.remove(os.path.join(self.persist_dir, key))
-        # then
-        with self.assertRaises(FileNotFoundError):
-            _ = self.myDict[key]
+        self.assertEqual(self.myDict[key], value)
 
     """
     __delitem__
@@ -178,18 +154,6 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # then
         with self.assertRaises(KeyError):
             del self.myDict[non_exist_key]
-
-    def test_del_pair_if_key_exists_and_value_not_exists(self):
-        # given
-        key = 'test_key'
-        value = 'test_value'
-        self.myDict[key] = value
-        # when
-        # some disaster
-        os.remove(os.path.join(self.persist_dir, key))
-        # then
-        with self.assertRaises(KeyError):
-            del self.myDict[key]
 
     """
     keys()
