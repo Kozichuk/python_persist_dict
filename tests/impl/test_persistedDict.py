@@ -221,6 +221,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # given
         dict_2_key = "dict_2_key"
         dict_2_persist_dir = "persist_2"
+        dict_2_persist_storages_file_mask = "storage_2"
         # and
         key_1_in_dict_2 = "key_1"
         key_2_in_dict_2 = "key_2"
@@ -237,6 +238,8 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # then
         self.assertIn(key_1_in_dict_2, unpickled_dict.keys())
         self.assertIn(key_2_in_dict_2, unpickled_dict.keys())
+        # teardown
+        unpickled_dict.clear()
 
 
     def tearDown(self):
