@@ -34,6 +34,8 @@ class TestPersistedDictInitDict(unittest.TestCase):
         self.test_dict = PersistedDict(test_path)
         # then
         self.assertIn(key_1, self.test_dict.keys())
+        # tesrDown
+        self.test_dict.clear()
 
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     def test_init_storage_from_non_accessible_folder_raised_exception(self):
@@ -45,10 +47,6 @@ class TestPersistedDictInitDict(unittest.TestCase):
             self.test_dict = PersistedDict(non_accessible_path)
         # then
         # catch exception
-
-    def tearDown(self):
-        pass
-        # self.test_dict.clear()
 
 
 class DummyObject(object):
