@@ -4,7 +4,7 @@ import unittest
 
 from parameterized import parameterized
 
-from impl.persisted_dict import PersistedDict
+from impl.persisted_dict import PersistenceDict
 
 
 class TestPersistedDictInitDict(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestPersistedDictInitDict(unittest.TestCase):
         # given
         test_path = 'test_persist'
         # when
-        self.test_dict = PersistedDict(test_path)
+        self.test_dict = PersistenceDict(test_path)
         # then
         self.assertTrue(os.path.isdir(self.test_dict.storage_dir))
         # tearDown
@@ -27,11 +27,11 @@ class TestPersistedDictInitDict(unittest.TestCase):
         value_1 = 'value_1'
         # and
         test_path = 'test_persist'
-        self.test_dict = PersistedDict(test_path)
+        self.test_dict = PersistenceDict(test_path)
         # and
         self.test_dict[key_1] = value_1
         # when
-        self.test_dict = PersistedDict(test_path)
+        self.test_dict = PersistenceDict(test_path)
         # then
         self.assertIn(key_1, self.test_dict.keys())
         # tesrDown
@@ -44,7 +44,7 @@ class TestPersistedDictInitDict(unittest.TestCase):
         non_accessible_path = 'C:/Windows/tmp'
         # when
         with self.assertRaises(PermissionError):
-            self.test_dict = PersistedDict(non_accessible_path)
+            self.test_dict = PersistenceDict(non_accessible_path)
         # then
         # catch exception
 
@@ -63,7 +63,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
 
     def setUp(self):
         self.persist_dir = 'test_persist'
-        self.test_dict = PersistedDict(self.persist_dir)
+        self.test_dict = PersistenceDict(self.persist_dir)
 
     """
     __setitem__
@@ -206,7 +206,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         # when
         self.test_dict[self_key] = self.test_dict
         # then
-        unpickled_dict: PersistedDict = self.test_dict[self_key]
+        unpickled_dict: PersistenceDict = self.test_dict[self_key]
         self.test_dict[key_3] = value_3
         # and
         self.assertIn(key_1, unpickled_dict.keys())
@@ -227,7 +227,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         value_1_in_dict_2 = "value_1"
         value_2_in_dict_2 = "value_2"
         # and
-        dict_2 = PersistedDict(dict_2_persist_dir)
+        dict_2 = PersistenceDict(dict_2_persist_dir)
         dict_2[key_1_in_dict_2] = value_1_in_dict_2
         dict_2[key_2_in_dict_2] = value_2_in_dict_2
         # when

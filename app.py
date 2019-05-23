@@ -1,6 +1,6 @@
-from impl.persisted_dict import PersistedDict
+from impl.persisted_dict import PersistenceDict
 
-myDictionary = PersistedDict('persist')
+myDictionary = PersistenceDict('persist')
 myDictionary['a'] = {1: [1, 2, 3, 4]}
 print(myDictionary.keys())
 
