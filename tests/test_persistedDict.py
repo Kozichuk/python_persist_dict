@@ -4,7 +4,7 @@ import unittest
 
 from parameterized import parameterized
 
-from impl.persisted_dict import PersistenceDict
+from persistent_dict.persisted_dict import PersistenceDict
 
 
 class TestPersistedDictInitDict(unittest.TestCase):
@@ -131,7 +131,7 @@ class TestPersistedDictBasicOperations(unittest.TestCase):
         self.assertEqual(self.test_dict[key], dummy_object)
 
     def test_add_new_pair_with_invalid_value_raises_exception(self):
-        # Можем положить любой объект, как будто ограничений нет
+        # No limitations on object
         self.assertTrue(True)
 
     """

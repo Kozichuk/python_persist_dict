@@ -2,7 +2,7 @@ import os
 import shelve
 import shutil
 
-from impl import get_module_logger
+from persistent_dict import get_module_logger
 
 
 class PersistentDictContainer:
@@ -91,7 +91,7 @@ class PersistenceDict(dict):
             storage.clear()
         shutil.rmtree(self.__storage_dir)
 
-    # обходим ограничение shelve - можно использовать только строки в качестве ключей
+    # workaround key limitations of shelve
     def __to_shelved_key(self, key):
         self.__log.debug('Origin key {}'.format(key))
         if type(key) is int:

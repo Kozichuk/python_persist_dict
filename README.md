@@ -1,18 +1,14 @@
 Persisted Dictionary
 ====
 
-Реализация словаря(key value) с сохранением значния в файл  
-Сохранение объекта в файл осуществленно при помощи библиотеки shelve
+Dictionary implementation with saving values into files. 
+Based on shelve lib.
 
-Поддерживаемые операции
+Supported operations
 --
-- получение значение по ключу
-- добавить значение по ключу
-    - в случае если такой ключ существует происходит перезапись
-- удалить значение по ключу
-- очистить словарь
-
-Принцип работы
---
-При инициализации словаря происходит создание директории, где будут хранится наши хранилища.  
+- get value by key
+- set value by key
+    - if key exists - rewrite value
+- delete value by key
+- clear dictionary 
 

@@ -1,0 +1,1 @@
+from persistent_dict.utils import get_module_logger
