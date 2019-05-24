@@ -16,7 +16,7 @@ class PersistentDictContainer:
     def to_dictionary(dict_obj):
         if not isinstance(dict_obj, PersistentDictContainer):
             raise ValueError
-        return PersistenceDict(dict_obj.storage_dir, dict_obj.storage_files_mask, dict_obj.debug)
+        return PersistentDict(dict_obj.storage_dir, dict_obj.storage_files_mask, dict_obj.debug)
 
 
 class SelfMarker:
@@ -27,7 +27,7 @@ class SelfMarker:
     pass
 
 
-class PersistenceDict(dict):
+class PersistentDict(dict):
     __storage_dir = None
     __keys = set()
     __log = None
@@ -62,7 +62,7 @@ class PersistenceDict(dict):
         self.__validate_key(key)
         prepared_key = self.__to_shelved_key(key)
 
-        if isinstance(value, PersistenceDict):
+        if isinstance(value, PersistentDict):
             value = SelfMarker() if value == self else self.to_container(value)
 
         with shelve.open(self.__storage) as storage:
@@ -77,7 +77,7 @@ class PersistenceDict(dict):
         self.__keys.remove(key)
 
     def __eq__(self, other):
-        if not isinstance(other, PersistenceDict):
+        if not isinstance(other, PersistentDict):
             return False
         return self.storage_dir == other.storage_dir and self.keys() == other.keys()
 
@@ -129,6 +129,6 @@ class PersistenceDict(dict):
                 raise KeyError("String key must be not empty")
 
     def to_container(self, object_dict) -> PersistentDictContainer:
-        if not isinstance(object_dict, PersistenceDict):
+        if not isinstance(object_dict, PersistentDict):
             raise ValueError
         return PersistentDictContainer(object_dict.storage_dir, object_dict.storage_files_mask, object_dict.get_debug())
